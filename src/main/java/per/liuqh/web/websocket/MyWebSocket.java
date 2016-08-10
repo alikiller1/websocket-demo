@@ -11,8 +11,11 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
  
 //该注解用来指定一个URI，客户端可以通过这个URI来连接到WebSocket。类似Servlet的注解mapping。无需在web.xml中配置。
-@ServerEndpoint("/websocket")
+@ServerEndpoint("/testWS")
 public class MyWebSocket {
+	public MyWebSocket(){
+		System.out.println("MyWebSocket init");
+	}
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static int onlineCount = 0;
      
@@ -48,16 +51,12 @@ public class MyWebSocket {
      * 收到客户端消息后调用的方法
      * @param message 客户端发送过来的消息
      * @param session 可选的参数
+     * @throws IOException 
      */
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public void onMessage(String message, Session session) throws IOException {
         System.out.println("来自客户端的消息:" + message);
-        try {
-			sendMessage(message);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+        sendMessageToAll(message);
     }
      
     /**
@@ -71,14 +70,24 @@ public class MyWebSocket {
         error.printStackTrace();
     }
      
-    /**
-     * 这个方法与上面几个方法不一样。没有用注解，是根据自己需要添加的方法。
-     * @param message
-     * @throws IOException
-     */
+   /**
+    * 发送消息给当前用户
+    * @param message
+    * @throws IOException
+    */
     public void sendMessage(String message) throws IOException{
         this.session.getBasicRemote().sendText(message);
         //this.session.getAsyncRemote().sendText(message);
+    }
+    /**
+     * 向所有用户发送消息
+     * @param message
+     * @throws IOException
+     */
+    public void sendMessageToAll(String message) throws IOException{
+    	for(MyWebSocket mws: webSocketSet){
+    		mws.sendMessage( message) ;
+    	}
     }
  
     public static synchronized int getOnlineCount() {
