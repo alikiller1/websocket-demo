@@ -26,7 +26,7 @@
        
       //判断当前浏览器是否支持WebSocket
       if('WebSocket' in window){
-          websocket = new WebSocket("ws://localhost:8080/testWS");
+          websocket = new WebSocket("ws://localhost:8080/websocket/testWS");
       }
       else{
           alert('Not support websocket')
